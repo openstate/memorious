@@ -1,0 +1,54 @@
+# Scraper for the OCCRP web site.
+# The goal is not to download all HTML, but only PDFs & other documents
+# linked from the page as proof.
+name: covid19
+
+# A title for display in the UI:
+description: "Covid19 NL"
+
+pipeline:
+  init:
+    # This first stage will get the ball rolling with a seed URL.
+    method: seed
+    params:
+      urls:
+        - https://do-ams3-17.hw.webhare.net/services/wobcovid19-prod-1/search/?first=0&count=10000&orderby=publicationdate
+    handle:
+      pass: fetch
+
+  fetch:
+    # Download the seed page
+    method: fetch
+    params:
+      # These rules specify which pages should be scraped or included:
+      rules:
+        and:
+          - domain: webhare.net
+          # - not:
+          #     or:
+          #       - mime_group: assets
+          #       - mime_group: images
+    handle:
+      pass: parse
+
+  parse:
+    # Parse the scraped pages to find if they contain additional links.
+    method: parse
+    params:
+      # Additional rules to determine if a scraped page should be stored or not.
+      # In this example, we're only keeping PDFs, word files, etc.
+      store:
+        or:
+          - mime_group: web
+          - mime_group: archives
+          - mime_group: documents
+    handle:
+      store: store
+      # this makes it a recursive web crawler:
+      fetch: fetch
+
+  store:
+    # Store the crawled documents to a directory
+    method: directory
+    params:
+      path: /data/results

@@ -4,7 +4,8 @@ COPY setup.py /crawlers/
 COPY src /crawlers/src
 RUN pip3 install -q -e /crawlers
 COPY config /crawlers/config
-
+COPY requirements.txt /crawlers
+RUN pip3 install -r requirements.txt
 ENV MEMORIOUS_BASE_PATH=/data \
     MEMORIOUS_CONFIG_PATH=/crawlers/config \
     MEMORIOUS_DEBUG=false \

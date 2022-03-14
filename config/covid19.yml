@@ -12,8 +12,8 @@ pipeline:
     method: seed
     params:
       urls:
-        - https://do-ams3-17.hw.webhare.net/services/wobcovid19-prod-1/search/?first=175&count=10&orderby=publicationdate
-        #- https://do-ams3-17.hw.webhare.net/services/wobcovid19-prod-1/search/?first=0&count=10000&orderby=publicationdate
+        #- https://do-ams3-17.hw.webhare.net/services/wobcovid19-prod-1/search/?first=175&count=10&orderby=publicationdate
+        - https://do-ams3-17.hw.webhare.net/services/wobcovid19-prod-1/search/?first=0&count=10000&orderby=publicationdate
     handle:
       pass: fetch
 
@@ -70,6 +70,8 @@ pipeline:
     # Parse the scraped pages to find if they contain additional links.
     method: parse
     params:
+      meta:
+        title: './/h1'
       # Additional rules to determine if a scraped page should be stored or not.
       # In this example, we're only keeping PDFs, word files, etc.
       store:
@@ -77,6 +79,8 @@ pipeline:
           - mime_group: web
           - mime_group: archives
           - mime_group: documents
+          - pattern: "https://wobcovid19.rijksoverheid.nl/publicaties/.*/"
+
     handle:
       store: store
       # this makes it a recursive web crawler:

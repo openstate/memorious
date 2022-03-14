@@ -12,7 +12,8 @@ pipeline:
     method: seed
     params:
       urls:
-        - https://do-ams3-17.hw.webhare.net/services/wobcovid19-prod-1/search/?first=0&count=10000&orderby=publicationdate
+        - https://do-ams3-17.hw.webhare.net/services/wobcovid19-prod-1/search/?first=175&count=10&orderby=publicationdate
+        #- https://do-ams3-17.hw.webhare.net/services/wobcovid19-prod-1/search/?first=0&count=10000&orderby=publicationdate
     handle:
       pass: fetch
 

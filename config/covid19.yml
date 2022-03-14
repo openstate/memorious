@@ -21,17 +21,51 @@ pipeline:
     method: fetch
     params:
       # These rules specify which pages should be scraped or included:
-      rules:
-        and:
-          - domain: webhare.net
-          # - not:
-          #     or:
-          #       - mime_group: assets
-          #       - mime_group: images
+      # rules:
+      #   and:
+      #     - domain: webhare.net
+      #     # - not:
+      #     #     or:
+      #     #       - mime_group: assets
+      #     #       - mime_group: images
     handle:
       pass: parse
 
   parse:
+    # Parse the scraped pages to find if they contain additional links.
+    method: memorious_utils.json:parse
+    params:
+      itempath: results[*]
+      # Additional rules to determine if a scraped page should be stored or not.
+      # In this example, we're only keeping PDFs, word files, etc.
+      # store:
+      #   or:
+      #     - mime_group: web
+      #     - mime_group: archives
+      #     - mime_group: documents
+    handle:
+      store: store
+      # this makes it a recursive web crawler:
+      fetch: fetch
+      pass: enrich
+  enrich:
+    method: covid19.item:enrich
+    handle:
+      fetch: fetch_detail
+  fetch_detail:
+    # Download the seed page
+    method: fetch
+    params:
+      rules:
+        and:
+          - domain: wobcovid19.rijksoverheid.nl
+          - not:
+              or:
+                - mime_group: assets
+                - mime_group: images
+    handle:
+      pass: parse_detail
+  parse_detail:
     # Parse the scraped pages to find if they contain additional links.
     method: parse
     params:
@@ -45,8 +79,7 @@ pipeline:
     handle:
       store: store
       # this makes it a recursive web crawler:
-      fetch: fetch
-
+      fetch: fetch_detail
   store:
     # Store the crawled documents to a directory
     method: directory

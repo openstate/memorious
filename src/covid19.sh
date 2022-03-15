@@ -8,7 +8,7 @@ for i in *.json; do
     echo "Should make directory $fn now"
     mkdir -p $fn
     cd $fn
-    pdfseparate "../$fn.data.pdf" "%d.pdf"
+    pdfseparate "../$fn.data.pdf" "$fn-%05d.pdf"
     cd ..
   fi
 done

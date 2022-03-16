@@ -79,7 +79,7 @@ def main(argv):
     collection = api.load_collection_by_foreign_id(foreign_id)
     collection_id = collection.get('id')
 
-    document_links = []
+    main_folders = {}
     for f in glob('%s/*.json' % (data_path,)):
         root, ext = splitext(f)
         meta = load_meta(f)
@@ -94,8 +94,27 @@ def main(argv):
             continue
         folder_meta = {
             'title': meta['url'].split('/')[-1],
-            'foreign_id': meta['url']
+            'foreign_id': meta['url'],
+            'source_url': meta['url'],
+            'modified_at': meta['modified_at']
         }
+        base_url = meta['url'].replace(folder_meta['title'], '')
+        print(base_url)
+        try:
+            pub_id = main_folders[base_url]
+        except Exception as e:
+            pub_id = None
+        if pub_id is None:
+            pub_meta = {
+                'title': meta.get('title'),
+                'description': meta.get('description'),
+                'foreign_id': base_url,
+                'source_url': base_url,
+                'modified_at': meta['modified_at']
+            }
+            result = api.ingest_upload(collection_id, None, pub_meta)
+            pub_id = result.get('id')
+        folder_meta['parent'] = {'id': pub_id}
         result = api.ingest_upload(collection_id, None, folder_meta)
         parent_id = result.get('id')
         for p in glob('%s/*.pdf' % (root,)):
@@ -112,33 +131,6 @@ def main(argv):
             document_id = result.get('id')
             if parent_id is None:
                 parent_id = document_id
-        # cleaned_name = meta['author'].replace('Gemeente ', '')
-        # if cleaned_name in gemeenten:
-        #     municipality_id = gemeenten[cleaned_name].get('id')
-        #     if municipality_id is not None:
-        #         document_links.append(
-        #             create_link(
-        #                 document_id, municipality_id,
-        #                 meta.get('start_date'), meta.get('end_date')))
-        # file_path = 'www.personadeinteres.org/uploads/example.pdf'
-        # metadata = {'file_name': 'example.pdf'}
-        # # Upload the document:
-        # result = api.ingest_upload(collection_id, file_path, metadata)
-        #
-        # # Finally, we have an entity ID:
-        # document_id = result.get('id')
-        # batch_count = 0
-        # if len(document_links) >= parsed_args.batch_size:
-        #     entities = [l.to_dict() for l in document_links]
-        #     # You can also feed an iterator to write_entities if you
-        #     # want to upload a very large
-        #     result = api.write_entities(collection_id, entities)
-        #     batch_count += 1
-        #     print("Uploaded %s batches to Aleph" % (batch_count,))
-        #     pprint(result)
-        #     document_links = []
-        #     sleep(parsed_args.sleep)
-
     return 0
 
 if __name__ == '__main__':

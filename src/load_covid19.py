@@ -3,6 +3,7 @@
 import sys
 import argparse
 from glob import glob
+import os
 from os.path import basename, splitext
 import json
 from pathlib import Path
@@ -16,11 +17,23 @@ from alephclient.api import AlephAPI
 # Load the followthemoney data model:
 from followthemoney import model
 
+def eprint(*args, **kwargs):
+    print(*args, file=sys.stderr, **kwargs)
+
 def load_meta(f):
     result = None
     with open(f, 'r') as in_file:
         result = json.load(in_file)
     return result
+
+def create_document(document_url, title, description, mod_date):
+    doc_proxy = model.make_entity('Folder')
+    doc_proxy.make_id(document_url)
+    doc_proxy.add('title', title)
+    # doc_proxy.add('bodyText', description)
+    # doc_proxy.add('modifiedAt', mod_date)
+    # doc_proxy.add('sourceUrl', document_url)
+    return doc_proxy
 
 def create_link(document_id, muni_id, start_date=None, end_date=None):
     # Create the link entity proxy:
@@ -66,35 +79,42 @@ def main(argv):
     collection = api.load_collection_by_foreign_id(foreign_id)
     collection_id = collection.get('id')
 
-    gemeenten = {}
-
-    for i in api.stream_entities(collection, schema='PublicBody'):
-        for n in i['properties']['name']:
-            gemeenten[n] = i
-
     document_links = []
     for f in glob('%s/*.json' % (data_path,)):
-        print(f)
         root, ext = splitext(f)
         meta = load_meta(f)
-        if 'id' not in meta.keys():
-            print("No id for crawled result, continuing")
+        if 'url' not in meta.keys():
+            eprint("No url for %s, continuing" % (f,))
             continue
-        html_file = '%s.data.html' % (root,)
-        metadata = {
-            'file_name': '%s.html' % (meta['id'],)
-        }
-        meta.update(metadata)
-        result = api.ingest_upload(collection_id, Path(html_file), meta)
-        document_id = result.get('id')
-        cleaned_name = meta['author'].replace('Gemeente ', '')
-        if cleaned_name in gemeenten:
-            municipality_id = gemeenten[cleaned_name].get('id')
-            if municipality_id is not None:
-                document_links.append(
-                    create_link(
-                        document_id, municipality_id,
-                        meta.get('start_date'), meta.get('end_date')))
+        if '/pdf' not in meta['headers'].get('Content-Type', ''):
+            eprint("%s is not a pdf, continuing" % (f,))
+            continue
+        if not os.path.exists(root):
+            eprint("%s pdf was not converted into pages, skipping" % (f,))
+            continue
+        parent_id = None
+        for p in glob('%s/*.pdf' % (root,)):
+            proot, pext = splitext(p)
+            meta['file_name'] = '%s' % (p.replace('%s/' % (root,), ''),)
+            if parent_id is not None:
+                metadata = {
+                    #'pdfHash': meta['url'],
+                    'parent': {'id': parent_id}
+                }
+                meta.update(metadata)
+            #pprint(meta)
+            result = api.ingest_upload(collection_id, Path(p), meta)
+            document_id = result.get('id')
+            if parent_id is None:
+                parent_id = document_id
+        # cleaned_name = meta['author'].replace('Gemeente ', '')
+        # if cleaned_name in gemeenten:
+        #     municipality_id = gemeenten[cleaned_name].get('id')
+        #     if municipality_id is not None:
+        #         document_links.append(
+        #             create_link(
+        #                 document_id, municipality_id,
+        #                 meta.get('start_date'), meta.get('end_date')))
         # file_path = 'www.personadeinteres.org/uploads/example.pdf'
         # metadata = {'file_name': 'example.pdf'}
         # # Upload the document:
@@ -102,16 +122,17 @@ def main(argv):
         #
         # # Finally, we have an entity ID:
         # document_id = result.get('id')
-        batch_count = 0
-        if len(document_links) >= parsed_args.batch_size:
-            entities = [l.to_dict() for l in document_links]
-            # You can also feed an iterator to write_entities if you
-            # want to upload a very large
-            api.write_entities(collection_id, entities)
-            batch_count += 1
-            print("Uploaded %s batches to Aleph" % (batch_count,))
-            document_links = []
-            sleep(parsed_args.sleep)
+        # batch_count = 0
+        # if len(document_links) >= parsed_args.batch_size:
+        #     entities = [l.to_dict() for l in document_links]
+        #     # You can also feed an iterator to write_entities if you
+        #     # want to upload a very large
+        #     result = api.write_entities(collection_id, entities)
+        #     batch_count += 1
+        #     print("Uploaded %s batches to Aleph" % (batch_count,))
+        #     pprint(result)
+        #     document_links = []
+        #     sleep(parsed_args.sleep)
 
     return 0
 

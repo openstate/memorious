@@ -72,6 +72,7 @@ pipeline:
     params:
       meta:
         title: './/h1'
+        description: './/div[contains(@class, "publication__description")]'
       # Additional rules to determine if a scraped page should be stored or not.
       # In this example, we're only keeping PDFs, word files, etc.
       store:

@@ -1,4 +1,5 @@
-FROM alephdata/memorious:latest
+#FROM alephdata/memorious:latest
+FROM alephdata/memorious:2.4.5
 RUN apt-get update &&  apt-get install -y poppler-utils
 COPY setup.py /crawlers/
 COPY src /crawlers/src

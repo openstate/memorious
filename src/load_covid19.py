@@ -92,7 +92,12 @@ def main(argv):
         if not os.path.exists(root):
             eprint("%s pdf was not converted into pages, skipping" % (f,))
             continue
-        parent_id = None
+        folder_meta = {
+            'title': meta['url'].split('/')[-1],
+            'foreign_id': meta['url']
+        }
+        result = api.ingest_upload(collection_id, None, folder_meta)
+        parent_id = result.get('id')
         for p in glob('%s/*.pdf' % (root,)):
             proot, pext = splitext(p)
             meta['file_name'] = '%s' % (p.replace('%s/' % (root,), ''),)

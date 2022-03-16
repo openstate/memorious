@@ -12,3 +12,5 @@ for i in *.json; do
     cd ..
   fi
 done
+python3 load_covid19.py -f $COVID19_ALEPH_FOREIGN_ID -d /data/results/covid19/ -b 0
+rm -fr /data/results/covid19/*

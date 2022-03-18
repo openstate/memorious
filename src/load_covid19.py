@@ -83,6 +83,10 @@ def main(argv):
     for f in glob('%s/*.json' % (data_path,)):
         root, ext = splitext(f)
         meta = load_meta(f)
+        done_path = '%s.done' % (root,)
+        if os.path.exists(done_path):
+            eprint("%s was already done and uploaded to aleph." % (f,))
+            continue
         if 'url' not in meta.keys():
             eprint("No url for %s, continuing" % (f,))
             continue
@@ -131,6 +135,7 @@ def main(argv):
             document_id = result.get('id')
             if parent_id is None:
                 parent_id = document_id
+        open(done_path, 'a').close()
     return 0
 
 if __name__ == '__main__':

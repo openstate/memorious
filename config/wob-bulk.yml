@@ -1,6 +1,6 @@
-name: covid19ro
+name: wob-bulk
 # A title for display in the UI:
-description: "Covid 19 Wob Rijksoverheid"
+description: "Wob Rijksoverheid"
 
 
 pipeline:
@@ -9,7 +9,7 @@ pipeline:
     method: seed
     params:
       urls:
-        - https://www.rijksoverheid.nl/documenten?trefwoord=corona+OR+covid+OR+coronavirus&startdatum=&einddatum=01-01-2021&onderdeel=Alle+ministeries&type=Wob-verzoek
+        - https://www.rijksoverheid.nl/documenten?trefwoord=&startdatum=&einddatum=&onderdeel=Alle+ministeries&type=Wob-verzoek
     handle:
       pass: fetch
 

@@ -1,15 +1,12 @@
-name: covid19ro
+name: wob
 # A title for display in the UI:
-description: "Covid 19 Wob Rijksoverheid"
+description: "Wob Rijksoverheid"
 
 
 pipeline:
   init:
     # This first stage will get the ball rolling with a seed URL.
-    method: seed
-    params:
-      urls:
-        - https://www.rijksoverheid.nl/documenten?trefwoord=corona+OR+covid+OR+coronavirus&startdatum=&einddatum=01-01-2021&onderdeel=Alle+ministeries&type=Wob-verzoek
+    method: wob.feed:seed
     handle:
       pass: fetch
 

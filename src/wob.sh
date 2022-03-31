@@ -23,5 +23,5 @@ for i in *.json; do
   echo "----------"
 done
 cd /crawlers/src
-python3 load_covid19.py -f $FID  -d $RESULTSDIR -b 10
+python3 load_covid19.py -f $FID  -d $RESULTSDIR -b 10 -s 10
 #rm -fr /data/results/covid19/*

@@ -80,6 +80,7 @@ def main(argv):
     collection_id = collection.get('id')
 
     main_folders = {}
+    batch_count = 0
     for f in glob('%s/*.json' % (data_path,)):
         root, ext = splitext(f)
         meta = load_meta(f)
@@ -135,6 +136,10 @@ def main(argv):
             document_id = result.get('id')
             if parent_id is None:
                 parent_id = document_id
+            batch_count += 1
+            if batch_count > parsed_args.batch_size:
+                sleep(parsed_args.sleep)
+                batch_count = 0
         open(done_path, 'a').close()
     return 0
 

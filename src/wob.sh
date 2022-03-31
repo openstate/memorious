@@ -1,9 +1,10 @@
 #!/bin/sh
 cd /memorious
 memorious run wob
-RESULTSDIR = $1 || "/data/results/wob"
-FID = $2 || $COVID19_ALEPH_FOREIGN_ID
-cd  $ESULTSDIR
+RESULTSDIR=($1||"/data/results/wob")
+FID=($2||$COVID19_ALEPH_FOREIGN_ID)
+echo "Uploading to alepg $FID from $RESULTSDIR"
+cd $RESULTSDIR
 for i in *.json; do
   fn=`basename $i .json`
   echo $fn

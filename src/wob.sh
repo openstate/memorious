@@ -2,11 +2,11 @@
 cd /memorious
 memorious run wob
 RESULTSDIR=$1
-if [ -e "$1" ]; then
+if [ -z "$1" ]; then
   RESULTSDIR=/data/results/wob
 fi
 FID=$2
-if [ -e "$2" ]; then
+if [ -z "$2" ]; then
   FID=$COVID19_ALEPH_FOREIGN_ID
 fi
 echo "Uploading to alepg $FID from $RESULTSDIR"

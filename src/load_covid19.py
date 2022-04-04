@@ -133,7 +133,7 @@ def main(argv):
                 meta.update(metadata)
             #pprint(meta)
             result = api.ingest_upload(collection_id, Path(p), meta)
-            context.log.info('Result: %s' % (result,))
+            print('Result: %s' % (result,))
             document_id = result.get('id')
             if parent_id is None:
                 parent_id = document_id

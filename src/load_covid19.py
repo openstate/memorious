@@ -10,7 +10,7 @@ from pathlib import Path
 from pprint import pprint
 from itertools import islice, chain
 from time import sleep
-
+import re
 # Import alephclient:
 from alephclient.api import AlephAPI
 
@@ -24,6 +24,9 @@ def load_meta(f):
     result = None
     with open(f, 'r') as in_file:
         result = json.load(in_file)
+    # dutch gov websites sometimes have iso8601 dates with no seconds :/
+    if len(result['modified_at']) == 16:
+        result['modified_at'] += ':00'
     return result
 
 def create_document(document_url, title, description, mod_date):
